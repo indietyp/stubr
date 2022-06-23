@@ -2,6 +2,7 @@ use std::path::PathBuf;
 use reqwest::Client;
 
 #[derive(Debug, Eq, PartialEq, Clone)]
+#[non_exhaustive]
 pub struct RecordConfig {
     /// Port number the recording proxy server is listening on.
     /// Defaults to a random one.

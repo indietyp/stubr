@@ -3,7 +3,7 @@ use std::net::SocketAddr;
 use log::info;
 use tokio::sync::mpsc::{channel, Sender};
 use warp::{Filter, filters::{host::Authority, path::FullPath}, http::HeaderMap, hyper::body::Bytes, Rejection, Reply};
-use warp_reverse_proxy::{extract_request_data_filter, Method, proxy_to_and_forward_response, QueryParameters};
+use warp_reverse_proxy::{CLIENT, extract_request_data_filter, Method, proxy_to_and_forward_response, QueryParameters};
 
 use super::{
     port::PortAllocator,
@@ -14,7 +14,11 @@ use super::{
 pub struct Proxy;
 
 impl Proxy {
-    pub(crate) fn run(cfg: RecordConfig, then: fn(RecordInput)) -> (SocketAddr, Sender<String>) {
+    pub(crate) fn run(mut cfg: RecordConfig, then: fn(RecordInput)) -> (SocketAddr, Sender<String>) {
+        if let Some(client) = cfg.client.take() {
+            CLIENT.set(client).unwrap();
+        }
+
         let (tx, mut rx) = channel::<String>(1);
         let addr = PortAllocator::new_binding(cfg.port);
         let server = warp::serve(warp::any().and(Self::forward_and_record(cfg, then).boxed()));

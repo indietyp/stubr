@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+use reqwest::Client;
 
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct RecordConfig {
@@ -12,6 +13,10 @@ pub struct RecordConfig {
     pub except_request_headers: Option<Vec<&'static str>>,
     /// Do not record those response headers
     pub except_response_headers: Option<Vec<&'static str>>,
+    /// Custom client for proxy requests, this is useful in cases
+    /// where you would want to disable or enable certain features in the deployed reverse
+    /// proxy making the actual requests to the remote server.
+    pub client: Option<Client>
 }
 
 impl RecordConfig {
@@ -26,6 +31,7 @@ impl Default for RecordConfig {
             output: None,
             except_request_headers: Some(vec![Self::HOST_HEADER, Self::USER_AGENT_HEADER]),
             except_response_headers: None,
+            client: None
         }
     }
 }
